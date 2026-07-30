@@ -10,7 +10,7 @@ import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI, Type } from '@google/genai';
 import { Spot, SystemStats } from './src/types';
 
-// Standard hotel coordinates (Sample City, Sample Region) by default - Hotel Sample Hotel
+// Default sample hotel coordinates (placeholder location for the demo)
 const DEFAULT_HOTEL = {
   name: 'サンプルホテル',
   latitude: 35.0000,
@@ -27,26 +27,6 @@ if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
-// Enforce immediate migration from Sample City B to Sample City configuration if detected
-const checkAndMigrateDatabase = () => {
-  if (fs.existsSync(HOTEL_FILE)) {
-    try {
-      const existing = JSON.parse(fs.readFileSync(HOTEL_FILE, 'utf-8'));
-      if (existing.name && (existing.name.includes('B市') || existing.name.includes('中心街') || existing.name === 'サンプルホテル')) {
-        console.log('[CONCIERGE SERVER] Sample City B hotel detected. Overwriting with Sample City "サンプルホテル" configuration...');
-        fs.writeFileSync(HOTEL_FILE, JSON.stringify(DEFAULT_HOTEL, null, 2));
-        // Force rewrite spots file to Sample City seed spots
-        if (fs.existsSync(SPOTS_FILE)) {
-          fs.unlinkSync(SPOTS_FILE);
-        }
-      }
-    } catch (e) {
-      console.warn('[CONCIERGE SERVER] Startup migration check failed:', e);
-    }
-  }
-};
-checkAndMigrateDatabase();
-
 // Ensure files exist with seeds
 if (!fs.existsSync(HOTEL_FILE)) {
   fs.writeFileSync(HOTEL_FILE, JSON.stringify(DEFAULT_HOTEL, null, 2));
@@ -60,19 +40,19 @@ const SEED_SPOTS: Spot[] = [
     name: {
       ja: '城跡ロープウェイ商店街',
       en: 'Castle Ropeway Shopping Street',
-      zh_cn: '城跡缆车街',
-      zh_tw: '城跡纜車街',
-      ko: '마쓰야마성 로프웨이 상점가'
+      zh_cn: '城址缆车商店街',
+      zh_tw: '城址纜車商店街',
+      ko: '성터 로프웨이 상점가'
     },
     description: {
-      ja: 'ホテルのすぐ側に広がる、城跡山頂へと続く美しい並木道です。A県産のみかんジュースの蛇口、銘菓タルトや銘菓団子の老舗、地元タオルの直営店、モダンなお洒落カフェや骨董品店などがずらりと並んでおり、歩くだけでA県の豊かな文化と情緒を満喫できます。',
-      en: 'A scenic boardwalk extending just feet from our hotel entrance, leading up to the historic Castle ropeway station. The street is lined with elegant boutiques, artisanal orange juice counters, traditional Sample Region sweetshops, and Imabari towel flagships.',
-      zh_cn: '紧邻酒店的一条景观步行街，直通城跡索道站。街道两旁鳞次栉比地开满了高雅精品店、橘子汁特色店、爱媛传统糕点名铺以及地元毛巾旗舰店，极富散步和购物乐趣。',
-      zh_tw: '緊鄰酒店的一條景觀步行街，直通城跡索道站。街道兩旁鱗次櫛比地開滿了高雅精品店、橘子汁特色店、A県傳統糕點名鋪以及地元毛巾旗艦店，極富散步和購物樂趣。',
-      ko: '호텔 바로 옆에 펼쳐져 마쓰야마성 로프웨이 승강장까지 이어지는 정취 있는 산책로입니다. 에히메 특산 감귤 주스 수돗물 체험, 전통 타르트와 단고 전문점, 이마바리 타올 공식 숍, 모던한 카페들이 늘어서 있어 걷는 것만으로도 즐거움을 선사합니다.'
+      ja: 'ホテルのすぐ側に広がる、城跡の山頂へと続く美しい並木道です。地元産フルーツジュースのスタンド、銘菓の老舗、タオルなど特産品の直営店、モダンなお洒落カフェや骨董品店などがずらりと並んでおり、歩くだけで地域の文化と情緒を満喫できます。',
+      en: 'A scenic boardwalk extending just steps from the hotel entrance, leading up to the castle ropeway station. The street is lined with elegant boutiques, fresh fruit juice stands, traditional confectioners, and local craft shops.',
+      zh_cn: '紧邻酒店的一条景观步行街，直通城址索道站。街道两旁鳞次栉比地开满了高雅精品店、鲜果汁特色店、传统糕点名铺以及本地工艺品店，极富散步和购物乐趣。',
+      zh_tw: '緊鄰酒店的一條景觀步行街，直通城址索道站。街道兩旁鱗次櫛比地開滿了高雅精品店、鮮果汁特色店、傳統糕點名鋪以及本地工藝品店，極富散步和購物樂趣。',
+      ko: '호텔 바로 옆에 펼쳐져 성터 로프웨이 승강장까지 이어지는 정취 있는 산책로입니다. 지역 특산 과일 주스 스탠드, 전통 과자 전문점, 지역 공예품 숍, 모던한 카페들이 늘어서 있어 걷는 것만으로도 즐거움을 선사합니다.'
     },
-    latitude: 35.0000,
-    longitude: 135.0000, // approx 60m
+    latitude: 34.9997,
+    longitude: 135.0006, // approx 60m
     tags: ['#スタッフ厳選', '#徒歩5分以内', '#ご当地グルメ'],
     image_urls: ['https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=600&auto=format&fit=crop'],
     status: 'active',
@@ -85,16 +65,16 @@ const SEED_SPOTS: Spot[] = [
     name: {
       ja: '温泉本館',
       en: 'Historic Onsen Bathhouse',
-      zh_cn: '道后温泉本馆',
-      zh_tw: '温泉街溫泉本館',
-      ko: '도고 온센 혼칸 (도고 온천 본관)'
+      zh_cn: '温泉本馆',
+      zh_tw: '溫泉本館',
+      ko: '온천 본관'
     },
     description: {
-      ja: '3000年以上の歴史を誇る日本最古の温泉であり、国の重要文化財に指定された壮麗な3階建ての城郭風木造建築です。小説『名作小説』や映画のモデルとして名高く、平成の大改修を終えて古き佳き時代の贅沢な佇まいが蘇りました。とろりとした美肌の湯を心ゆくまでご堪能ください。',
-      en: 'The jewel of Sample Region boasting a magnificent castle-like wooden complex with over 3,000 years of bathhouse history. Declared a National Important Cultural Property, its legendary alkaline waters soothe structural tension and leave the skin silky smooth.',
-      zh_cn: '拥有3000年历史的日本古老名汤，整座建筑是一栋被公认为国家重要文化财产的壮丽日本城堡风三层木质楼阁。这里也是宫崎骏电影及众多文学名著的灵感圣地，滑爽的碱性泉质具有极佳的美肌功效。',
-      zh_tw: '擁有3000年歷史的日本古老名湯，整座建築是一棟被公認為國家重要文化財產的壯麗日本城堡風三層木質樓閣。這裡也是宮崎駿電影及眾多文學名著的靈感聖地，華爽的鹼性泉質具有極佳的美肌功效。',
-      ko: '3000년 이상의 역사를 품은 일본에서 가장 오래된 온천이자, 국가 중요문화재로指定된 장엄한 3층 규모의 전통 목조건축물입니다. 소설과 영화의 배경 모델로도 유명하며, 최근 대대적인 복원 공사를 마치고 한층 우아한 자태로 미끄러운 미인탕의 온천수를 제공합니다.'
+      ja: '長い歴史を誇る由緒ある温泉であり、壮麗な3階建ての城郭風木造建築です。文学作品や映画のモデルとして名高く、大改修を終えて古き佳き時代の贅沢な佇まいが蘇りました。とろりとした美肌の湯を心ゆくまでご堪能ください。',
+      en: 'A magnificent castle-like wooden bathhouse complex with centuries of history. A celebrated cultural landmark, its legendary alkaline waters soothe tired muscles and leave the skin silky smooth.',
+      zh_cn: '拥有悠久历史的名汤，整座建筑是一栋壮丽的日本城堡风三层木质楼阁。这里也是众多文学名著的灵感之地，滑爽的碱性泉质具有极佳的美肌功效。',
+      zh_tw: '擁有悠久歷史的名湯，整座建築是一棟壯麗的日本城堡風三層木質樓閣。這裡也是眾多文學名著的靈感之地，滑爽的鹼性泉質具有極佳的美肌功效。',
+      ko: '오랜 역사를 품은 유서 깊은 온천이자, 장엄한 3층 규모의 성곽풍 전통 목조건축물입니다. 문학 작품과 영화의 배경 모델로도 유명하며, 대대적인 복원 공사를 마치고 한층 우아한 자태로 미끄러운 미인탕의 온천수를 제공합니다.'
     },
     latitude: 35.0000,
     longitude: 135.0153, // easy tram access
@@ -109,20 +89,20 @@ const SEED_SPOTS: Spot[] = [
     source: 'hotel_master',
     name: {
       ja: '郷土料理 サンプル亭 本店',
-      en: 'Sample-tei Local Gourmet',
-      zh_cn: '乡土料理 サンプル亭 本店',
-      zh_tw: '鄉土料理 サンプル亭 本店',
-      ko: '향토요리 고시키 본점'
+      en: 'Sample-tei Local Cuisine',
+      zh_cn: '乡土料理 样品亭 本店',
+      zh_tw: '鄉土料理 樣品亭 本店',
+      ko: '향토요리 샘플테이 본점'
     },
     description: {
-      ja: '寛永12年（1635年）創業、実に380年以上の超老舗郷土料理店です。A県名物の真鯛そのものを炊き込む「鯛めし」と、生卵入りのだし醤油に真鯛の刺身を絡めてご飯にかける「刺身鯛めし」の2大鯛めしを一度に楽しめます。美しく彩られた五色そうめんも一級品です。',
-      en: 'An iconic local institution serving local delicacies since 1635. Experience the epic rivalry of Sample Region\'s dual signature dishes under one roof: Sample City Taimeshi (simmered savory sea bream over rice) and Neighbouring City Taimeshi (fresh raw bream ribbons dipped in rich amber egg glaze).',
-      zh_cn: '创业于1635年的超历史级爱媛名铺。在这里您可以一站式体验爱媛县两大王牌美食——热气腾腾的“A市鲷鱼饭”，以及用新鲜鲷鱼刺身裹上浓香生鸡蛋酱油浇于热饭之上的“宇和岛鲷鱼饭”。',
-      zh_tw: '創業於1635年的超歷史級A県名鋪。在這裡您可以一站式體驗A県縣兩大王牌美食——熱氣騰騰的「A市鯛魚飯」，以及用新鮮鯛魚刺身裹上濃香生雞蛋醬油澆於熱飯之上的「近隣市鯛魚飯」。',
-      ko: '1635년 창업하여 380년이 넘는 전통을 간직한 마쓰야마 최고의 향토 요리 전문점입니다. 도미를 밥과 함께 쪄내는 고소한 "마쓰야마 타이메시"와 신선한 참돔 회를 계란 간장 고명에 비벼 먹는 "우와지마 타이메시"를 한자리에서 최고의 퀄리티로 맛볼 수 있습니다.'
+      ja: '江戸時代創業、380年以上の歴史を持つ老舗郷土料理店です。地元名物の真鯛を炊き込む「鯛めし」と、生卵入りのだし醤油に真鯛の刺身を絡めてご飯にかける「刺身鯛めし」の2種を一度に楽しめます。美しく彩られた五色そうめんも一級品です。',
+      en: 'An iconic local institution serving regional delicacies for over 380 years. Experience both of the area\'s signature sea bream rice dishes under one roof: the simmered savory version, and the fresh raw style dipped in a rich amber egg glaze.',
+      zh_cn: '创业于江户时代、拥有380余年历史的乡土料理老铺。在这里您可以一站式体验当地两大王牌美食——热气腾腾的“鲷鱼饭”，以及用新鲜鲷鱼刺身裹上浓香生鸡蛋酱油浇于热饭之上的“刺身鲷鱼饭”。',
+      zh_tw: '創業於江戶時代、擁有380餘年歷史的鄉土料理老鋪。在這裡您可以一站式體驗當地兩大王牌美食——熱氣騰騰的「鯛魚飯」，以及用新鮮鯛魚刺身裹上濃香生雞蛋醬油澆於熱飯之上的「刺身鯛魚飯」。',
+      ko: '에도 시대에 창업하여 380년이 넘는 전통을 간직한 향토 요리 전문점입니다. 도미를 밥과 함께 쪄내는 고소한 "타이메시"와 신선한 참돔 회를 계란 간장 고명에 비벼 먹는 "사시미 타이메시"를 한자리에서 최고의 퀄리티로 맛볼 수 있습니다.'
     },
-    latitude: 35.0000,
-    longitude: 135.0000, // approx 450m
+    latitude: 34.9986,
+    longitude: 134.9949, // approx 450m
     tags: ['#スタッフ厳選', '#ご当地グルメ', '#ランチ', '#ディナー'],
     image_urls: ['https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600&auto=format&fit=crop'],
     status: 'active',
@@ -133,21 +113,21 @@ const SEED_SPOTS: Spot[] = [
     type: 'sightseeing',
     source: 'hotel_master',
     name: {
-      ja: 'サンプル荘',
+      ja: '洋館 サンプル荘',
       en: 'Sample-so French Villa',
-      zh_cn: '万翠庄',
-      zh_tw: '萬翠莊',
-      ko: '반스이소 (만수장)'
+      zh_cn: '洋楼 样品庄',
+      zh_tw: '洋樓 樣品莊',
+      ko: '서양식 별관 샘플소'
     },
     description: {
-      ja: '大正11年（1922年）に旧A市藩主が別邸として建てた、A県最古にして最もエレガントな純フランス風の洋館建築です。各界の皇族や文豪が集った社交場で、アンティークな暖炉、見事なステンドグラス、大正ロマンが息づく豪華な内装は国指定の重要文化財となっています。',
-      en: 'Built in 1922 as a scenic retreat for the local count, this pure French Neo-Renaissance villa stands as a sublime monument to Taisho-era romantic architecture. Its interior features authentic custom stained glass windows and magnificent period fireplaces.',
-      zh_cn: '建于1922年的纯法式新文艺复兴城堡式庄园，原为旧A市藩主久松伯爵の避暑別墅。这也是爱媛县最华美的洋楼，陈设着精工细作的水晶吊灯与绚丽无比の彩绘彩色玻璃，被列入国家重要文化财产。',
-      zh_tw: '建於1922年的純法式新文藝復興城堡式莊園，原為舊A市藩主久松伯爵的避暑別墅。這也是A県縣最華美的洋樓，陳設著精工細作的水晶吊燈與絢麗無比的彩繪彩色玻璃，被列入國家重要文化財產。',
-      ko: '대정 11년(1922년) 옛 마쓰야마 번주가 프랑스 르네상스 양식으로 건축한 마쓰야마 최초이자 가장 우아한 서양식 양관입니다. 과거 황족과 지식인들의 사교 클럽으로 쓰였으며, 고전적인 벽난로와 웅장한 스테인드글라스 등 대정 로망이 깃든 인테리어는 소중한 국가 중요문화재입니다.'
+      ja: '大正時代に旧藩主が別邸として建てた、地域最古にして最もエレガントな純フランス風の洋館建築です。各界の名士が集った社交場で、アンティークな暖炉、見事なステンドグラス、大正ロマンが息づく豪華な内装が魅力です。',
+      en: 'Built in the Taisho era as a retreat for the local nobility, this pure French Neo-Renaissance villa stands as a sublime monument to the period\'s romantic architecture. Its interior features authentic custom stained glass windows and magnificent period fireplaces.',
+      zh_cn: '建于大正时代的纯法式新文艺复兴城堡式庄园，原为旧藩主的避暑别墅。这也是当地最华美的洋楼，陈设着精工细作的水晶吊灯与绚丽无比的彩绘彩色玻璃。',
+      zh_tw: '建於大正時代的純法式新文藝復興城堡式莊園，原為舊藩主的避暑別墅。這也是當地最華美的洋樓，陳設著精工細作的水晶吊燈與絢麗無比的彩繪彩色玻璃。',
+      ko: '다이쇼 시대에 옛 번주가 프랑스 르네상스 양식으로 건축한 지역 최초이자 가장 우아한 서양식 양관입니다. 과거 명사들의 사교 클럽으로 쓰였으며, 고전적인 벽난로와 웅장한 스테인드글라스 등 다이쇼 로망이 깃든 인테리어가 매력입니다.'
     },
-    latitude: 35.0000,
-    longitude: 135.0000,
+    latitude: 34.9981,
+    longitude: 134.9993,
     tags: ['#スタッフ厳選', '#インスタ映え', '#雨でも安心'],
     image_urls: ['https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600&auto=format&fit=crop'],
     status: 'active',
@@ -160,18 +140,18 @@ const SEED_SPOTS: Spot[] = [
     name: {
       ja: '市立文学ミュージアム',
       en: 'City Literature Museum',
-      zh_cn: '坂上之云博物馆',
-      zh_tw: '坂上之雲博物館',
-      ko: '사카노우에노쿠모 뮤지엄'
+      zh_cn: '市立文学博物馆',
+      zh_tw: '市立文學博物館',
+      ko: '시립 문학 뮤지엄'
     },
     description: {
-      ja: 'A市が生んだ近代文学の巨頭・地元の文豪と、日露戦争を戦い抜いた地元の偉人・真之兄弟を描いた著名作家の名作小説をテーマにしています。世界的建築家・著名建築家氏の手による「浮遊感のあるスロープ」など斬新でスタイリッシュな近代コンクリート建築デザインも必見です。',
-      en: 'A gorgeous modern concrete museum conceived by world-renowned architect a renowned architect. Dedicated to a celebrated novelist\'s epic novel about the dramatic birth of modern Japan, following Sample City\'s native writers, poets, and military strategists.',
-      zh_cn: '由世界级建筑巨匠著名建築家设计的一座极具现代美感的清水混凝土建筑。该馆围绕司马辽太郎描绘A市出身的文豪正岡子规及秋山兄弟追寻近代强国之梦的史诗小说《坂上之云》展开，令人深思。',
-      zh_tw: '由世界級建築巨匠著名建築家設計的一座極具現代美感編清水混凝土建築。該館圍繞著名作家描繪A市出身の文豪地元の文豪及秋山兄弟追尋近代強國之夢的史詩小說《坂上之雲》展開，令人深思。',
-      ko: '세계적인 건축 거장 안도 다다오가 설계한 세련되고 기하학적인 현대 미술관입니다. 소설가 시바 료타로의 대하소설 사카노우에노쿠모를 테마로, 근대 일본의 여명을 밝힌 마쓰야마 출신의 문학가 마사오카 시키와 아키야마 형제의 발자취를 압도적인 공간미와 함께 담아냈습니다.'
+      ja: '地元が生んだ近代文学の巨匠たちと、その時代を描いた名作小説をテーマにした文学館です。著名建築家の手による「浮遊感のあるスロープ」など斬新でスタイリッシュな近代コンクリート建築デザインも必見です。',
+      en: 'A gorgeous modern concrete museum dedicated to the region\'s celebrated modern writers and the epic novels that chronicled their era. The building itself, with its floating ramps and geometric forms, is a work of art.',
+      zh_cn: '一座极具现代美感的清水混凝土建筑。该馆围绕本地出身的近代文豪及描绘那个时代的史诗小说展开，建筑本身悬浮式坡道的设计亦是一大亮点。',
+      zh_tw: '一座極具現代美感的清水混凝土建築。該館圍繞本地出身的近代文豪及描繪那個時代的史詩小說展開，建築本身懸浮式坡道的設計亦是一大亮點。',
+      ko: '세련되고 기하학적인 현대 미술관입니다. 지역 출신의 근대 문학 거장들과 그 시대를 그린 대하소설을 테마로, 부유감 있는 슬로프 등 압도적인 공간미를 담아냈습니다.'
     },
-    latitude: 35.0000,
+    latitude: 34.9983,
     longitude: 135.0000,
     tags: ['#スタッフ厳選', '#雨でも安心', '#和モダン'],
     image_urls: ['https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=600&auto=format&fit=crop'],
@@ -184,20 +164,20 @@ const SEED_SPOTS: Spot[] = [
     source: 'hotel_master',
     name: {
       ja: '温泉別館 サンプルの湯',
-      en: 'Sample-no-Yu Imperial Spa',
-      zh_cn: '道后温泉别馆 飞鸟乃汤泉',
-      zh_tw: '温泉街溫泉別館 サンプルの湯',
-      ko: '도고 온센 별관 아스카노유'
+      en: 'Sample-no-Yu Premium Spa',
+      zh_cn: '温泉别馆 样品之汤',
+      zh_tw: '溫泉別館 樣品之湯',
+      ko: '온천 별관 샘플노유'
     },
     description: {
-      ja: '聖徳太子や斉明天皇など、数多くの古代天皇が湯治に訪れた温泉の歴史に準じて、飛鳥時代の高貴な建築様式を忠実に再現した瀟洒なプレミアム外湯です。浴室内はA県の伝統工芸（地元陶器のプロジェクションマッピング等）とアートで贅沢に装飾されており、五感に響く歴史体験を楽しめます。',
-      en: 'A premium imperial-style annex reflecting Onsen\'s historic visits by ancient Japanese emperors during the Asuka period. Inside, soak surrounded by state-of-the-art historic Sample Region craft installations, projection mapping on classic pottery tiles, and traditional tea salons.',
-      zh_cn: '根据道后温泉曾接待圣德太子等古代多位天皇治病享汤的历史典故，以飞鸟时代高雅建筑风格全新打造的高端皇家风浴室。浴室内部采用了爱媛传统陶器地元陶器烧与先进投影艺术の浪漫融合，带来极致享受。',
-      zh_tw: '根據温泉街溫泉曾接待聖德太子等古代多位天皇治病享湯历史典故，以飛鳥時代高雅建築風格全新打造的高端皇家風浴室。浴室內部採用了A県傳統陶器地元陶器燒與先進投影藝術の浪漫融合，帶來極致享受。',
-      ko: '성덕태자 등 고대 일왕들이 휴양을 위해 도고를 찾았던 유래에 따라, 아스카 시대의 귀족적인 궁궐 양식으로 지은 최고급 별관 온천탕입니다. 내부 욕장은 에히메의 대표 도자기인 도베야키 도판화에 펼쳐지는 환상적인 프로젝션 맵핑과 고급 미술 공예품으로 꾸며져 한껏 귀한 대접을 받는 기분을 선사합니다.'
+      ja: '古代の貴人が湯治に訪れたという温泉の歴史に準じて、往時の高貴な建築様式を忠実に再現した瀟洒なプレミアム外湯です。浴室内は地域の伝統工芸（陶器のプロジェクションマッピング等）とアートで贅沢に装飾されており、五感に響く歴史体験を楽しめます。',
+      en: 'A premium annex built in the noble architectural style of the ancient era, reflecting the hot spring\'s storied history. Inside, soak surrounded by state-of-the-art local craft installations, projection mapping on classic pottery tiles, and traditional tea salons.',
+      zh_cn: '依据古代贵人曾到此汤治的历史典故，以往昔高雅建筑风格全新打造的高端外汤浴室。浴室内部采用了本地传统陶器与先进投影艺术的浪漫融合，带来极致享受。',
+      zh_tw: '依據古代貴人曾到此湯治的歷史典故，以往昔高雅建築風格全新打造的高端外湯浴室。浴室內部採用了本地傳統陶器與先進投影藝術的浪漫融合，帶來極致享受。',
+      ko: '고대 귀인들이 휴양을 위해 찾았다는 유래에 따라, 당시의 귀족적인 궁궐 양식으로 지은 최고급 별관 온천탕입니다. 내부 욕장은 지역의 대표 도자기 도판화에 펼쳐지는 환상적인 프로젝션 맵핑과 고급 미술 공예품으로 꾸며져 있습니다.'
     },
     latitude: 35.0000,
-    longitude: 135.0000,
+    longitude: 135.0143,
     tags: ['#スタッフ厳選', '#インスタ映え', '#和モダン'],
     image_urls: ['https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=600&auto=format&fit=crop'],
     status: 'active',
@@ -543,7 +523,7 @@ Please search Google (using the Search Grounding tool) to find exactly 6 highly 
 
 For each of the 6 spots found, generate a complete hotel concierge database entry following the strictly typed schema. Ensure descriptions are compelling and fully translated into Japanese, English, Simplified Chinese, Traditional Chinese, and Korean. Define coordinates accurately so distances can be compute mathematically.`,
         config: {
-          systemInstruction: `You are an elite multilingual hotel concierge. Utilize Google Search grounding tool to gather real information about highly rated tourist destinations, traditional food spots, hot springs (especially Onsen Onsen related locations since latitude ${hotel.latitude} is in Sample City, Sample Region, Japan), and local museums. Structure the output perfectly inside the requested JSON Schema. No generic names, use real establishments.`,
+          systemInstruction: `You are an elite multilingual hotel concierge. Utilize Google Search grounding tool to gather real information about highly rated tourist destinations, traditional food spots, hot springs, and local museums near the coordinates (${hotel.latitude}, ${hotel.longitude}). First determine which city and region those coordinates fall in, then search for well-regarded establishments in that area. Structure the output perfectly inside the requested JSON Schema. No generic names, use real establishments.`,
           tools: [{ googleSearch: {} }],
           responseMimeType: 'application/json',
           responseSchema: {
@@ -716,8 +696,8 @@ Pinpoint its real geographic coordinate, categories/tags, and elegant translatio
                 },
                 required: ['ja', 'en', 'zh_cn', 'zh_tw', 'ko']
               },
-              latitude: { type: Type.NUMBER, description: 'Accurate latitude coordinates (e.g. 33.8xxx if Sample City).' },
-              longitude: { type: Type.NUMBER, description: 'Accurate longitude coordinates (e.g. 132.7xxx if Sample City).' },
+              latitude: { type: Type.NUMBER, description: 'Accurate latitude coordinates of the spot.' },
+              longitude: { type: Type.NUMBER, description: 'Accurate longitude coordinates of the spot.' },
               tags: {
                 type: Type.ARRAY,
                 items: { type: Type.STRING },
@@ -789,7 +769,7 @@ Pinpoint its real geographic coordinate, categories/tags, and elegant translatio
       console.log('[CONCIERGE SERVER] Resolved Google Maps URL:', fullUrl);
 
       const hotel = getHotelConfig();
-      let latitude = hotel.latitude + 0.0005; // Slightly shifted Sample City coord
+      let latitude = hotel.latitude + 0.0005; // Slightly shifted from the hotel coord
       let longitude = hotel.longitude + 0.0005;
 
       const atMatch = fullUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);

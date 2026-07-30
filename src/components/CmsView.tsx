@@ -79,7 +79,7 @@ export default function CmsView({ onBackToGuest }: CmsViewProps) {
 
   // Around Recommended spots auto-refresh via search grounding
   const handleAutoRefreshAround = async () => {
-    if (!confirm('現在地ホテル（A県A市）の周辺スポットをGoogle Search / Maps の実在データから自動収集し、周辺案内データベースを最新に更新します。既存のスポットは最新のおすすめ情報に置き換えられます。よろしいですか？\n(Gemini 3.5-flash & Google Grounding 搭載)')) return;
+    if (!confirm('現在設定されているホテル座標の周辺スポットをGoogle Search / Maps の実在データから自動収集し、周辺案内データベースを最新に更新します。既存のスポットは最新のおすすめ情報に置き換えられます。よろしいですか？\n(Gemini 3.5-flash & Google Grounding 搭載)')) return;
     
     setIsRefreshingAround(true);
     try {
@@ -89,7 +89,7 @@ export default function CmsView({ onBackToGuest }: CmsViewProps) {
       });
       if (res.ok) {
         const data = await res.json();
-        alert(`A市周辺の最新の人気スポット・名店情報 ${data.count} 件の自動取得と多言語データベース更新に成功しました！`);
+        alert(`周辺の最新の人気スポット・名店情報 ${data.count} 件の自動取得と多言語データベース更新に成功しました！`);
         fetchCmsData();
       } else {
         const err = await res.json();
@@ -680,7 +680,7 @@ export default function CmsView({ onBackToGuest }: CmsViewProps) {
                   )}
                 </button>
                 <p className="text-[9px] text-slate-400 mt-2 text-left leading-relaxed">
-                  ホテルの緯度・経度を中心として、Googleマップ上の実在する人気レストランやおすすめ観光地6選をAI（Gemini 3.5 Flash）が自動探索・多言語で一括更新します。ホテル設定をA市や他の場所へ変えた際もポチッと押すだけで一瞬で最適化されます。
+                  ホテルの緯度・経度を中心として、Googleマップ上の実在する人気レストランやおすすめ観光地6選をAI（Gemini 3.5 Flash）が自動探索・多言語で一括更新します。ホテル設定を別の場所へ変えた際もポチッと押すだけで一瞬で最適化されます。
                 </p>
               </div>
             </div>
@@ -875,7 +875,7 @@ export default function CmsView({ onBackToGuest }: CmsViewProps) {
                     <label className="block text-[11px] font-semibold text-slate-500 mb-1">名称 <span className="text-rose-500">*必須</span></label>
                     <input
                       type="text"
-                      placeholder="例: 地元ビール館、中心商店街、一福"
+                      placeholder="例: 温泉街、中心商店街、地元の名店"
                       value={currentSpot.name?.ja || ''}
                       onChange={(e) => setCurrentSpot({
                         ...currentSpot,
@@ -903,7 +903,7 @@ export default function CmsView({ onBackToGuest }: CmsViewProps) {
                     </label>
                     <textarea
                       rows={4}
-                      placeholder="例: A市温泉街のおすすめのスポットの魅力をご紹介します..."
+                      placeholder="例: 周辺のおすすめスポットの魅力をご紹介します..."
                       value={currentSpot.description?.ja || ''}
                       onChange={(e) => setCurrentSpot({
                         ...currentSpot,
@@ -979,48 +979,28 @@ export default function CmsView({ onBackToGuest }: CmsViewProps) {
                     
                     <div className="space-y-2">
                       <div>
-                        <span className="block text-[9px] font-semibold text-slate-400 mb-1">【A市・温泉街周辺 (A県A市)】</span>
+                        <span className="block text-[9px] font-semibold text-slate-400 mb-1">【サンプル座標プリセット】</span>
                         <div className="flex flex-wrap gap-2">
-                          <button 
-                            type="button" 
-                            onClick={() => fillPresetCoordinates(35.0000, 135.0000)}
+                          <button
+                            type="button"
+                            onClick={() => fillPresetCoordinates(35.0000, 135.01530)}
                             className="px-2.5 py-1 text-[10px] font-medium rounded bg-white hover:bg-slate-100 border border-slate-200 cursor-pointer text-slate-600 transition"
                           >
                             ♨️ 温泉本館周辺 (35.0000, 135.0153)
                           </button>
-                          <button 
-                            type="button" 
-                            onClick={() => fillPresetCoordinates(35.0000, 135.0000)}
+                          <button
+                            type="button"
+                            onClick={() => fillPresetCoordinates(34.99970, 135.00060)}
                             className="px-2.5 py-1 text-[10px] font-medium rounded bg-white hover:bg-slate-100 border border-slate-200 cursor-pointer text-slate-600 transition"
                           >
-                            🏯 城跡天守閣周辺 (35.0000, 135.0000)
+                            🏯 城跡周辺 (34.9997, 135.0006)
                           </button>
-                          <button 
-                            type="button" 
-                            onClick={() => fillPresetCoordinates(35.00000, 135.0000)}
+                          <button
+                            type="button"
+                            onClick={() => fillPresetCoordinates(34.99860, 134.99490)}
                             className="px-2.5 py-1 text-[10px] font-medium rounded bg-white hover:bg-slate-100 border border-slate-200 cursor-pointer text-slate-600 transition"
                           >
-                            🌳 中央公園周辺 (35.0000, 135.0000)
-                          </button>
-                        </div>
-                      </div>
-
-                      <div>
-                        <span className="block text-[9px] font-semibold text-slate-400 mb-1">【B市中心街周辺】</span>
-                        <div className="flex flex-wrap gap-2">
-                          <button 
-                            type="button" 
-                            onClick={() => fillPresetCoordinates(35.0000, 135.0000)}
-                            className="px-2.5 py-1 text-[10px] font-medium rounded bg-white hover:bg-slate-100 border border-slate-200 cursor-pointer text-slate-600 transition"
-                          >
-                            📍 サンプル店A近郊 (35.0000, 135.0000)
-                          </button>
-                          <button 
-                            type="button" 
-                            onClick={() => fillPresetCoordinates(35.0000, 135.0000)}
-                            className="px-2.5 py-1 text-[10px] font-medium rounded bg-white hover:bg-slate-100 border border-slate-200 cursor-pointer text-slate-600 transition"
-                          >
-                            📍 サンプル店B近郊 (35.0000, 135.0000)
+                            🌳 中央公園周辺 (34.9986, 134.9949)
                           </button>
                         </div>
                       </div>
@@ -1028,7 +1008,7 @@ export default function CmsView({ onBackToGuest }: CmsViewProps) {
                   </div>
                 </div>
 
-                {/* 5. IMAGE URL LIST (WITH KYOTO RICH PRESETS) */}
+                {/* 5. IMAGE URL LIST (WITH RICH PRESETS) */}
                 <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-4">
                   <h3 className="text-xs font-bold text-slate-700 flex items-center mb-1">
                     <ImageIcon className="w-4 h-4 text-slate-600 mr-1.5" />
@@ -1051,7 +1031,7 @@ export default function CmsView({ onBackToGuest }: CmsViewProps) {
 
                   {/* Clicking preset images */}
                   <div>
-                    <span className="block text-[10px] font-semibold text-slate-400 mb-2">【ワンクリック画像入力】B市グルメ・観光スポットお勧め写真素材</span>
+                    <span className="block text-[10px] font-semibold text-slate-400 mb-2">【ワンクリック画像入力】グルメ・観光スポットお勧め写真素材</span>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
                       {EXPERT_PRESETS.map((p) => {
                         const isSelected = currentSpot.image_urls?.[0] === p.url;
