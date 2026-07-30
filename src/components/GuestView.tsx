@@ -32,7 +32,7 @@ interface GuestViewProps {
   onGoToCms: () => void;
 }
 
-// Sample City B Central District Coordinates
+// Latitude / longitude pair
 interface Coords {
   lat: number;
   lng: number;
